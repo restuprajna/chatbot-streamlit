@@ -26,7 +26,7 @@ def generate_response(question: str) -> str:
     response = requests.post(url, headers=headers_template, json=data)
     return json.loads(response.text)
 
-# Function to handle file uploads
+# function to handle file upload
 def handle_file_upload(uploaded_file):
     if uploaded_file is not None:
         file_path = uploaded_file.name
@@ -56,6 +56,34 @@ def handle_chat_input():
         st.session_state.messages.append({"role": "assistant", "content": response})
         st.chat_message("assistant").write(response)
 
+def file_manager():
+    # Initialize session state for uploaded files
+    if "uploaded_files" not in st.session_state:
+        st.session_state.uploaded_files = []
+
+    # Sidebar layout
+    with st.sidebar:
+        st.title("File Manager")
+
+        # File uploader
+        uploaded_file = st.file_uploader("Upload a file", type=None, label_visibility="visible")
+        if uploaded_file is not None:
+            st.session_state.uploaded_files.append(uploaded_file)
+
+        # List all uploaded files
+        st.subheader("Uploaded Files")
+        if st.session_state.uploaded_files:
+            for i, file in enumerate(st.session_state.uploaded_files):
+                st.write(f"{i+1}. {file.name}")
+        else:
+            st.write("No files uploaded yet.")
+
+        # Reset button to delete all uploaded files
+        if st.button("Reset All Files"):
+            st.session_state.uploaded_files.clear()
+            st.success("All files have been deleted.")
+            st.experimental_rerun()  # Refresh the app to update the file list
+
 # Main app layout
 def main():
     st.title("💬 Chatbot")
@@ -68,6 +96,8 @@ def main():
 
     # Chat input and response handling
     handle_chat_input()
+
+    file_manager()
 
 if __name__ == "__main__":
     main()
